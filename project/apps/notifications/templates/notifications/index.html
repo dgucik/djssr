@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications — MyApp{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-[700px]">
+    <div class="bg-white rounded-xl shadow-md px-10 py-12">
+        {% include "components/card_header.html" with icon="🔔" title="Send Notification" subtitle="Choose a channel to send your notification through." %}
+
+        <div class="grid grid-cols-2 gap-4">
+            {% include "notifications/components/channel_card.html" with icon="📱" label="SMS" description="Send via text message" href="#" %}
+            {% include "notifications/components/channel_card.html" with icon="✉️" label="Email" description="Send via email" href="#" %}
+        </div>
+    </div>
+</div>
+{% endblock %}

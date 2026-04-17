@@ -1,0 +1,25 @@
+<div class="mb-[1.1rem]">
+    <label for="{{ field.id_for_label }}" class="block text-[0.85rem] font-semibold text-gray-900 mb-[0.4rem]">{{ label }}</label>
+    <input
+        type="{{ type }}"
+        name="{{ field.html_name }}"
+        id="{{ field.id_for_label }}"
+        value="{{ field.value|default:'' }}"
+        {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
+        {% if autofocus %}autofocus{% endif %}
+        {% if maxlength %}maxlength="{{ maxlength }}"{% endif %}
+        class="w-full px-[0.9rem] py-[0.65rem] border-[1.5px] {{ field.errors|yesno:'border-red-600,border-slate-200' }} rounded-lg text-[0.95rem] text-gray-900 bg-white outline-none focus:border-indigo-600 focus:ring-3 focus:ring-indigo-600/15 transition"
+    />
+    {% if field.errors %}
+        <ul class="list-none mt-[0.35rem]">
+            {% for error in field.errors %}
+                <li class="text-[0.8rem] text-red-600 flex items-start gap-[0.3rem]">
+                    <span class="shrink-0 mt-px w-3.5 h-3.5 bg-red-600 text-white rounded-full flex items-center justify-center text-[0.65rem] font-bold">!</span>
+                    {{ error }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% elif help_text %}
+        <p class="text-[0.78rem] text-gray-500 mt-[0.3rem]">{{ help_text }}</p>
+    {% endif %}
+</div>

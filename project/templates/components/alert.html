@@ -1,0 +1,7 @@
+<div class="px-4 py-3 rounded-lg text-[0.875rem] mb-5 flex items-start gap-2 {% if type == 'error' %}bg-red-50 border border-red-300 text-red-600{% else %}bg-emerald-50 border border-emerald-200 text-emerald-700{% endif %}">
+    {% if errors %}
+        {% for error in errors %}{{ error }}{% endfor %}
+    {% else %}
+        {{ message }}
+    {% endif %}
+</div>

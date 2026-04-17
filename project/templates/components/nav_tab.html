@@ -1,0 +1,5 @@
+<a href="{% url tab_url %}"
+   class="no-underline text-[0.9rem] font-medium px-[0.85rem] py-[0.4rem] rounded-lg transition-colors
+          {% if request.resolver_match.url_name == tab_url_name %}text-indigo-600 bg-indigo-50{% else %}text-gray-500 hover:text-gray-900 hover:bg-slate-100{% endif %}">
+    {{ tab_label }}
+</a>

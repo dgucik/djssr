@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account — MyApp{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-xl shadow-md px-8 py-10 w-full max-w-[420px]">
+    {% include "components/card_header.html" with icon="✨" title="Create an account" subtitle="Join us today — it's free" %}
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% include "components/form_field.html" with field=form.username label="Username" type="text" autocomplete="username" autofocus=True maxlength=150 help_text="Letters, digits and @/./+/-/_ only. Max 150 characters." %}
+        {% include "components/form_field.html" with field=form.email label="Email address" type="email" autocomplete="email" %}
+        {% include "components/form_field.html" with field=form.password1 label="Password" type="password" autocomplete="new-password" help_text="At least 8 characters. Cannot be too common or entirely numeric." %}
+        {% include "components/form_field.html" with field=form.password2 label="Confirm password" type="password" autocomplete="new-password" %}
+        {% include "components/btn_submit.html" with label="Create Account" %}
+    </form>
+
+    {% include "components/form_footer.html" with text="Already have an account?" url_name="users:login" link_text="Log in" %}
+</div>
+{% endblock %}
