@@ -25,7 +25,7 @@
                     </button>
                 </form>
             {% else %}
-                <a href="{% url 'users:login' %}" class="no-underline text-gray-500 text-[0.9rem] font-medium px-[0.85rem] py-[0.4rem] rounded-lg hover:text-gray-900 hover:bg-slate-100 transition-colors">Log in</a>
+                <a href="{% url 'users:login' %}" class="no-underline text-gray-400 text-[0.9rem] font-medium px-[0.85rem] py-[0.4rem] rounded-lg hover:text-gray-900 hover:bg-slate-100 transition-colors">Log in</a>
                 <a href="{% url 'users:register' %}" class="no-underline bg-indigo-600 text-white text-[0.9rem] font-medium px-[0.85rem] py-[0.4rem] rounded-lg hover:bg-indigo-700 transition-colors">Sign up</a>
             {% endif %}
         </div>

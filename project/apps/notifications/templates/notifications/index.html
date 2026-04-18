@@ -7,10 +7,16 @@
     <div class="bg-white rounded-xl shadow-md px-10 py-12">
         {% include "components/card_header.html" with icon="🔔" title="Send Notification" subtitle="Choose a channel to send your notification through." %}
 
-        <div class="grid grid-cols-2 gap-4">
-            {% include "notifications/components/channel_card.html" with icon="📱" label="SMS" description="Send via text message" href="#" %}
-            {% include "notifications/components/channel_card.html" with icon="✉️" label="Email" description="Send via email" href="#" %}
-        </div>
+        <form method="post" action="{% url 'notifications:send' %}">
+            {% csrf_token %}
+            <textarea name="message" rows="3" placeholder="Type your message..."
+                      class="w-full mb-6 px-4 py-3 rounded-lg border border-slate-200 text-[0.95rem] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-400 resize-none"></textarea>
+
+            <div class="grid grid-cols-2 gap-4">
+                {% include "notifications/components/channel_card.html" with icon="📱" label="SMS" description="Send via text message" sender_value="sms" %}
+                {% include "notifications/components/channel_card.html" with icon="✉️" label="Email" description="Send via email" sender_value="email" %}
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}
