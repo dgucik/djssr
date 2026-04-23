@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}My App{% endblock %}</title>
     {% tailwind_css %}
+    {% block extra_head %}{% endblock %}
 </head>
 <body class="font-sans bg-slate-100 text-gray-900 min-h-screen flex flex-col leading-relaxed">
 
@@ -14,6 +15,7 @@
         <a href="/" class="font-bold text-[1.2rem] text-indigo-600 no-underline tracking-tight">MyApp</a>
         <div class="flex items-center gap-1">
             {% include "components/nav_tab.html" with tab_label="Notifications" tab_url="notifications:index" tab_url_name="index" %}
+            {% include "components/nav_tab.html" with tab_label="Advanced Forms" tab_url="advanced_form:index" tab_url_name="index" %}
         </div>
         <div class="flex items-center gap-2">
             {% if user.is_authenticated %}

@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+{% endblock %}
+
+{% block title %}Products — MyApp{% endblock %}
+
+{% block content %}
+
+<script>
+function productEditor() {
+    const initial = {
+        products: {{ products_json|safe }},
+        infos: {{ infos_json|safe }}
+    };
+    return {
+        current: JSON.parse(JSON.stringify(initial)),
+        original: JSON.parse(JSON.stringify(initial)),
+        isDirty: false,
+        saving: false,
+        error: false,
+
+        check() {
+            this.isDirty = JSON.stringify(this.current) !== JSON.stringify(this.original);
+        },
+
+        discard() {
+            this.current = JSON.parse(JSON.stringify(this.original));
+            this.isDirty = false;
+        },
+
+        async save() {
+            this.saving = true;
+            this.error = false;
+            try {
+                const resp = await fetch('{% url "advanced_form:batch_update" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify(this.current),
+                });
+                if (resp.ok) {
+                    this.original = JSON.parse(JSON.stringify(this.current));
+                    this.isDirty = false;
+                } else {
+                    this.error = true;
+                }
+            } catch {
+                this.error = true;
+            } finally {
+                this.saving = false;
+            }
+        },
+    };
+}
+</script>
+
+<div x-data="productEditor()" class="w-full max-w-3xl mx-auto space-y-8 pb-24">
+
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Products</h1>
+        <p class="text-sm text-gray-500 mt-1">Overview of products, volumes, and additional information.</p>
+    </div>
+
+    <!-- Card 1: Name + Volume -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100">
+            <h2 class="text-base font-semibold text-gray-800">Products &amp; Volume</h2>
+        </div>
+        <table class="w-full text-sm table-fixed">
+            <colgroup><col class="w-1/2"><col class="w-1/2"></colgroup>
+            <thead class="bg-slate-50 border-b border-slate-200">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Volume</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+            {% for product in products %}
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-4 py-2">
+                    <input type="text"
+                        x-model="current.products['{{ product.pk }}'].name"
+                        @input="check()"
+                        class="w-full rounded-lg border border-transparent px-3 py-1.5 text-sm font-medium text-gray-800 hover:border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors bg-transparent focus:bg-white">
+                </td>
+                <td class="px-4 py-2">
+                    <input type="number" step="any"
+                        x-model="current.products['{{ product.pk }}'].volume"
+                        @input="check()"
+                        class="w-full rounded-lg border border-transparent px-3 py-1.5 text-sm text-gray-500 hover:border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors bg-transparent focus:bg-white">
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="2" class="px-6 py-4 text-gray-400">No products found.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Card 2: Name + Info -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100">
+            <h2 class="text-base font-semibold text-gray-800">Products &amp; Info</h2>
+        </div>
+        <table class="w-full text-sm table-fixed">
+            <colgroup><col class="w-1/2"><col class="w-1/2"></colgroup>
+            <thead class="bg-slate-50 border-b border-slate-200">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Info</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+            {% for product in products %}
+            {% with infos=product.productinfo_set.all %}
+            {% if infos %}
+            {% for item in infos %}
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-6 py-2.5 text-sm font-medium text-gray-800 align-middle">
+                    {% if forloop.first %}{{ product.name }}{% endif %}
+                </td>
+                <td class="px-4 py-2">
+                    <input type="text"
+                        x-model="current.infos['{{ item.pk }}'].info"
+                        @input="check()"
+                        class="w-full rounded-lg border border-transparent px-3 py-1.5 text-sm text-gray-500 hover:border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors bg-transparent focus:bg-white">
+                </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-6 py-2.5 text-sm font-medium text-gray-800">{{ product.name }}</td>
+                <td class="px-6 py-2.5 text-gray-300">—</td>
+            </tr>
+            {% endif %}
+            {% endwith %}
+            {% empty %}
+            <tr><td colspan="2" class="px-6 py-4 text-gray-400">No products found.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Floating save bar -->
+    <div
+        x-show="isDirty"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 translate-y-3"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 translate-y-3"
+        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-white border border-slate-200 rounded-2xl shadow-lg px-5 py-3"
+        style="display: none;">
+        <template x-if="error">
+            <span class="text-sm text-red-500">Something went wrong.</span>
+        </template>
+        <template x-if="!error">
+            <span class="text-sm text-gray-400">Unsaved changes</span>
+        </template>
+        <button
+            @click="discard()"
+            :disabled="saving"
+            class="text-sm font-medium text-gray-500 hover:text-gray-800 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors disabled:opacity-40 cursor-pointer border-0 bg-transparent">
+            Discard
+        </button>
+        <button
+            @click="save()"
+            :disabled="saving"
+            class="text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-1.5 rounded-lg transition-colors disabled:opacity-40 cursor-pointer border-0 flex items-center gap-2">
+            <template x-if="saving">
+                <svg class="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                </svg>
+            </template>
+            <span x-text="saving ? 'Saving…' : 'Save changes'"></span>
+        </button>
+    </div>
+
+</div>
+
+{% endblock %}

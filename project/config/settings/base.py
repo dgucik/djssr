@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.core',
     'apps.notifications',
+    'apps.advanced_form',
 ]
 
 TAILWIND_APP_NAME = 'theme'

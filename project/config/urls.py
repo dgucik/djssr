@@ -22,4 +22,5 @@ urlpatterns = [
     path('', include('apps.core.urls')),
     path('users/', include('apps.users.urls', namespace='users')),
     path('notifications/', include('apps.notifications.urls', namespace='notifications')),
+    path('advanced_form/', include('apps.advanced_form.urls', namespace='advanced_form')),
 ]
