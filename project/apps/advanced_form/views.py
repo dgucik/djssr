@@ -41,11 +41,34 @@ class ProductBatchUpdateView(View):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
+        created = {}
+
+        for key, fields in data.get('products', {}).items():
+            if not key.startswith('new_'):
+                continue
+            product = Product.objects.create(
+                name=fields.get('name', ''),
+                price=0,
+                description='',
+            )
+            volume_val = str(fields.get('volume', '')).strip()
+            if volume_val:
+                ProductVolume.objects.create(product=product, volume=volume_val)
+            info_key = key + '_info'
+            info_data = data.get('infos', {}).get(info_key, {})
+            info = ProductInfo.objects.create(
+                product=product,
+                info=info_data.get('info', ''),
+            )
+            created[key] = {'product_id': product.pk, 'info_id': info.pk}
+
         for pk_str, fields in data.get('products', {}).items():
+            if pk_str.startswith('new_'):
+                continue
             product = get_object_or_404(Product, pk=int(pk_str))
             product.name = fields.get('name', product.name)
             product.save()
-            volume_val = fields.get('volume', '').strip()
+            volume_val = str(fields.get('volume', '')).strip()
             if volume_val:
                 ProductVolume.objects.update_or_create(
                     product=product,
@@ -53,8 +76,10 @@ class ProductBatchUpdateView(View):
                 )
 
         for pk_str, fields in data.get('infos', {}).items():
+            if pk_str.startswith('new_'):
+                continue
             info = get_object_or_404(ProductInfo, pk=int(pk_str))
             info.info = fields.get('info', info.info)
             info.save()
 
-        return JsonResponse({'status': 'ok'})
+        return JsonResponse({'status': 'ok', 'created': created})
