@@ -15,14 +15,17 @@ class ProductPageView(TemplateView):
         context = super().get_context_data(**kwargs)
         products = list(Product.objects.prefetch_related('volume', 'productinfo_set'))
 
+        # Bootstraps Alpine.js state — keyed by PK string so JS can do O(1) lookups.
         products_json = {}
         for p in products:
+            # OneToOne reverse accessor raises DoesNotExist (not None) when missing.
             try:
                 vol = str(p.volume.volume)
             except ProductVolume.DoesNotExist:
                 vol = ''
             products_json[str(p.pk)] = {'name': p.name, 'volume': vol}
 
+        # Separate dict so the two table cards (Products & Info) share one JS state object.
         infos_json = {}
         for p in products:
             for info in p.productinfo_set.all():
@@ -41,8 +44,11 @@ class ProductBatchUpdateView(View):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
+        # Maps temp frontend key → real DB IDs so the client can swap them out.
         created = {}
 
+        # Pass 1: insert rows added in the current session.
+        # Frontend uses "new_<n>" prefix as a sentinel for rows without a real PK yet.
         for key, fields in data.get('products', {}).items():
             if not key.startswith('new_'):
                 continue
@@ -54,6 +60,7 @@ class ProductBatchUpdateView(View):
             volume_val = str(fields.get('volume', '')).strip()
             if volume_val:
                 ProductVolume.objects.create(product=product, volume=volume_val)
+            # Frontend pairs each product key with "<key>_info" for its ProductInfo entry.
             info_key = key + '_info'
             info_data = data.get('infos', {}).get(info_key, {})
             info = ProductInfo.objects.create(
@@ -62,6 +69,7 @@ class ProductBatchUpdateView(View):
             )
             created[key] = {'product_id': product.pk, 'info_id': info.pk}
 
+        # Pass 2: update existing products (skip new_ rows already handled above).
         for pk_str, fields in data.get('products', {}).items():
             if pk_str.startswith('new_'):
                 continue
